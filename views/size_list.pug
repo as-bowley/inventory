@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1= title
+
+  ul
+    each size in size_list
+      li
+        a(href=size.url) #{size.size}
+    else
+      li There are no sizes.
