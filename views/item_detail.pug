@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1= title
+
+  h4 Description:
+  p= item.description
+
+  h3
+    | Price: €
+    =item.price 
+  h3 
+    | Stock: 
+    = item.stock 
+  h3 
+    | Size: 
+    = item.size.size

@@ -1,4 +1,6 @@
 const Team = require("../models/team");
+const Item = require("../models/item");
+const async = require("async");
 
 // Display list of all Teams.
 exports.team_list = (req, res) => {
@@ -13,8 +15,32 @@ exports.team_list = (req, res) => {
 };
 
 // Display detail page for a specific Team.
-exports.team_detail = (req, res) => {
-  res.send(`NOT IMPLEMENTED: Team detail: ${req.params.id}`);
+exports.team_detail = (req, res, next) => {
+  async.parallel(
+    {
+      team(callback) {
+        Team.findById(req.params.id).exec(callback);
+      },
+      team_items(callback) {
+        Item.find({ team: req.params.id }).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.team == null) {
+        const err = new Error("No items for that team available.");
+        err.status = 404;
+        return next(err);
+      }
+      res.render("team_detail", {
+        title: "Items available for this team.",
+        team: results.team,
+        team_items: results.team_items,
+      });
+    }
+  );
 };
 
 // Display Team create form on GET.

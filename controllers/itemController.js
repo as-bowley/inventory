@@ -45,8 +45,38 @@ exports.item_list = (req, res) => {
 };
 
 // Display detail page for a specific Item.
-exports.item_detail = (req, res) => {
-  res.send(`NOT IMPLEMENTED: Item detail: ${req.params.id}`);
+exports.item_detail = (req, res, next) => {
+  async.parallel(
+    {
+      item(callback) {
+        Item.findById(req.params.id)
+          .populate("name")
+          .populate("description")
+          .populate("price")
+          .populate("stock")
+          .populate("size")
+          .exec(callback);
+      },
+      item_size(callback) {
+        Size.findById(req.params.size).populate("size").exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.item == null) {
+        const err = new Error("Item not found");
+        err.status = 404;
+        return next(err);
+      }
+      res.render("item_detail", {
+        title: results.item.name,
+        item: results.item,
+        size: results.item_size,
+      });
+    }
+  );
 };
 
 // Display Item create form on GET.

@@ -7,7 +7,7 @@ const SizeSchema = new Schema({
 });
 
 SizeSchema.virtual("url").get(function () {
-  return `/catalog/item/${this._id}`;
+  return `/catalog/size/${this._id}`;
 });
 
 // Export model

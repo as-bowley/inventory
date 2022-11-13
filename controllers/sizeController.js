@@ -1,4 +1,6 @@
 const Size = require("../models/size");
+const Item = require("../models/item");
+const async = require("async");
 
 // Display list of all Sizes.
 exports.size_list = (req, res) => {
@@ -13,8 +15,32 @@ exports.size_list = (req, res) => {
 };
 
 // Display detail page for a specific Size.
-exports.size_detail = (req, res) => {
-  res.send(`NOT IMPLEMENTED: Size detail: ${req.params.id}`);
+exports.size_detail = (req, res, next) => {
+  async.parallel(
+    {
+      size(callback) {
+        Size.findById(req.params.id).exec(callback);
+      },
+      size_items(callback) {
+        Item.find({ size: req.params.id }).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.size == null) {
+        const err = new Error("No items in that size available.");
+        err.status = 404;
+        return next(err);
+      }
+      res.render("size_detail", {
+        title: "Items available in this size.",
+        size: results.size,
+        size_items: results.size_items,
+      });
+    }
+  );
 };
 
 // Display Size create form on GET.
